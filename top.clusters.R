@@ -15,9 +15,9 @@ cluster_table <- read.table("table_clusters.txt", header = T)
 cluster_table <- as.data.frame(cluster_table)
 
 #sort table based on total number of clusters across species
-cluster_table$sum <- rowSums(cluster_table)
-cluster_table <- cluster_table[order(-cluster_table$sum),]
-cluster_table <- subset(cluster_table, select = -c(sum))
+#cluster_table$sum <- rowSums(cluster_table)
+#cluster_table <- cluster_table[order(-cluster_table$sum),]
+#cluster_table <- subset(cluster_table, select = -c(sum))
 cluster_table <- head(cluster_table,1000)
 
 #creating table of A clusters (check final table, there was an A2 not in line with the rest of "A"s)
@@ -43,13 +43,12 @@ ind.coord <- cluster.pca$x
 
 
 #subsetting data, taking first 1000 columns
-subsections <- as.data.frame(cluster_table[,1:1000])
-subsections$sub <-c("A1", "A1", "A1", "A2", "A2", "A2", "A2", "A2", "D5", "D5", "D5", "D5", "D5")
+subsections <- as.data.frame(cluster_table[,1:2])
+subsections$sub <-c("A1", "A1", "A1", "A2", "A2", "A2", "A2", "D5", "D5", "D5", "D5", "A2", "D5")
 
-subsections$CL0001 <- NULL
-subsections$CL0002 <- NULL
 
-subfac <- as.factor(subsections[,1])
+subsections <- subsections[,-c(1:2)]
+subfac <- as.factor(subsections)
 
 png("cotton_outgroup.PCA.direct.annot.new.png", 1000, 1000, pointsize=20)
 fviz_pca_ind(cluster.pca, habillage=subfac) + theme_minimal()

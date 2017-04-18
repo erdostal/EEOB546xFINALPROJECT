@@ -1,8 +1,6 @@
 library(lazyeval)
 library(ggplot2)
-#Package Simon used with original data
-library(contrast)
-#Package Corrinne has used to replicate similar data 
+#Package we used to replicate PCA (CAN NOT PRESENT THIS. CONFLICTS WITH PUBLICATION) 
 library(factoextra)
 
 #############################################
@@ -54,11 +52,19 @@ png("cotton_outgroup.PCA.direct.annot.new.png", 1000, 1000, pointsize=20)
 fviz_pca_ind(cluster.pca, habillage=subfac) + theme_minimal()
 dev.off()
 
-#Recreate table 2
-cluster.dist <- dist(cluster_table, diag=TRUE, upper = TRUE)
-cluster.dist
-modelAD <- lm(cluster.dist~AD)
-A1A2D5 <- as.factor(colnames(cluster_table))
-modelA1A2D5 <- lm(cluster.dist~A1A2D5)
-A1A2D5 <- as.factor(rownames(cluster_table))
-cluster.dist <- dist(cluster_table, diag=TRUE, upper = TRUE)
+
+#Recreate Table 2
+install.packages("reshape2")
+library(reshape2)
+new_table = cluster_table
+row.names(new_table) <- c("A1", "A1", "A1", "A2", "A2", "A2", "A2", "D5", "D5", "D5", "D5", "A2", "D5")
+melted <- melt(new_table)
+Y <- melted$value
+Species <- as.factor(melted$Var1)
+Cluster <- as.factor(melted$Var2)
+anova(lm(Y~Cluster*Species))
+
+#Recreate Figure 4 #still needs work 
+new_table <- as.data.frame(t(new_table))
+linear_model <- glm(A1~A2, data=new_table)
+ggplot(new_table, aes(x=A1, y=A2)) + geom_point(size=2) + geom_abline(intercept=0, slope=1)

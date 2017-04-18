@@ -54,4 +54,11 @@ png("cotton_outgroup.PCA.direct.annot.new.png", 1000, 1000, pointsize=20)
 fviz_pca_ind(cluster.pca, habillage=subfac) + theme_minimal()
 dev.off()
 
-
+#Recreate table 2
+cluster.dist <- dist(cluster_table, diag=TRUE, upper = TRUE)
+cluster.dist
+modelAD <- lm(cluster.dist~AD)
+A1A2D5 <- as.factor(colnames(cluster_table))
+modelA1A2D5 <- lm(cluster.dist~A1A2D5)
+A1A2D5 <- as.factor(rownames(cluster_table))
+cluster.dist <- dist(cluster_table, diag=TRUE, upper = TRUE)

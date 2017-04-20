@@ -107,7 +107,7 @@ dev.off()
 # AFAIK ordihull/spider appears to make the output of vegan more pretty
 
 ########### characterize composition ###########
-
+##Corrinne's code for Corrinne's file
 annot_clust <- read.table("annotated.counts", header = T, row.names=1, sep="\t")
 annot_clust$cluster <- NULL
 
@@ -131,33 +131,43 @@ KBsum$D5max <- apply(KBsum[,10:14], 1, max)
 KBsum$kirkiimax <- KBsum$kirkii
 KBsum$kokia_max <- KBsum$kokia_
 
-KBsum <- KBsum[,-(2:14)]
-KBm <- melt(KBsum[,-(7:16)])
-min <- c(KBsum$kirkiimin, KBsum$kokia_min, KBsum$A1min, KBsum$A2min, KBsum$D5min)
-max <- c(KBsum$kirkiimax, KBsum$kokia_max, KBsum$A1max, KBsum$A2max, KBsum$D5max)
+##### BEGIN EMMA'S CODE FOR FIGURE 2
+#Read averaged cluster counts per category
+KBsum <- read.csv("f.csv", header = TRUE)
+
+#Load reshape in order to melt data frame and create min/max columns
+library(reshape2)
+min <- c(KBsum$A1min, KBsum$A2min,KBsum$D5min)
+max <- c(KBsum$A1max, KBsum$A2max, KBsum$D5max)
+KBm <- melt(KBsum)
 KBm$min <- min
 KBm$max <- max
 
+#Load appropriate packages for visualzing data
+library(ggplot2)
+library(scales)
+library(gridExtra)
+#Turn min/max into limits for range bars
 limits <- aes(ymax=KBm$max, ymin=KBm$min)
 
+#Keep width of bars the same even though data size will change
 dodge <- position_dodge(width=0.9)
 
+#Create space for image 
 png("Figure_TE.amounts.png", 1000, 1000, pointsize=20)
+#List of colors to use in graph
+cols <- c("red","blue","green","yellow","orange","orchid","orange","darkgreen","orchid4")
+#List of parameters for image
+ggplot(KBm, aes(x=X, y=value, fill = variable)) + geom_bar(stat = "identity",position = dodge) + scale_y_log10() + scale_fill_manual(breaks=c("A1", "A2", "D5"), values = cols) + geom_errorbar(limits, position = dodge) 
 
-ggplot(KBm, aes(x=Lineage, y=value, fill = variable)) + geom_bar(stat = "identity",position = dodge) + scale_y_log10() + scale_fill_manual(breaks=c("kirkii", "kokia_", "A1", "A2", "D5"), values=c("blue3", "green3", "orchid", "orchid4", "slategrey")) + geom_errorbar(limits, position = dodge)
-dev.off()
 
-sum(KBsum$kirkii)/1000
-[1] 110.3615
-sum(KBsum$kokia_)/1000
-[1] 109.4685
 
 
 #### kirkii vs kokia clusters ####
 
 png("Figure_TE.comparisons.png", 1000, 1000, pointsize=20)
 
-p1 <- ggplot(annot_clust, aes(x=kokia_, y=kirkii, shape=signK, color=signK)) + geom_point(size=2) + geom_abline(intercept=0, size=1) + scale_color_manual(breaks=c("positive", "negative"), values=c("blue3", "green3")) +  scale_x_continuous(expand = c(0, 0), limits=c(0,750)) + scale_y_continuous(expand = c(0, 0), limits=c(0,750))
+p1 <- ggplot(annot_clust, aes(x=, y=kirkii, shape=signK, color=signK)) + geom_point(size=2) + geom_abline(intercept=0, size=1) + scale_color_manual(breaks=c("positive", "negative"), values=c("blue3", "green3")) +  scale_x_continuous(expand = c(0, 0), limits=c(0,750)) + scale_y_continuous(expand = c(0, 0), limits=c(0,750))
 p2 <- ggplot(annot_clust[annot_clust$Lineage == "LTR", ], aes(x=kokia_, y=kirkii, shape= signK, color=signK)) + geom_point(size=2) + geom_abline(intercept=0, size=1)+ scale_color_manual(breaks=c("positive", "negative"), values=c("blue3", "green3"))+ scale_x_continuous(expand = c(0, 0), limits=c(0,400)) + scale_y_continuous(expand = c(0, 0), limits=c(0,400))
 p3 <- ggplot(annot_clust[annot_clust$Lineage == "LTR/Gypsy", ], aes(x=kokia_, y=kirkii, shape= signK, color=signK)) + geom_point(size=2) + geom_abline(intercept=0, size=1)+ scale_color_manual(breaks=c("positive", "negative"), values=c("blue3", "green3"))+ scale_x_continuous(expand = c(0, 0), limits=c(0,750)) + scale_y_continuous(expand = c(0, 0), limits=c(0,750))
 p4 <- ggplot(annot_clust[annot_clust$Lineage == "LTR/Copia", ], aes(x=kokia_, y=kirkii, shape= signK, color=signK)) + geom_point(size=2) + geom_abline(intercept=0, size=1)+ scale_color_manual(breaks=c("positive", "negative"), values=c("blue3", "green3"))+ scale_x_continuous(expand = c(0, 0), limits=c(0,150)) + scale_y_continuous(expand = c(0, 0), limits=c(0,150))

@@ -106,6 +106,66 @@ dev.off()
 # not to mention there are tons of other options
 # AFAIK ordihull/spider appears to make the output of vegan more pretty
 
+########### characterize composition ###########
+
+annot_clust <- read.table("annotated.counts", header = T, row.names=1, sep="\t")
+annot_clust$cluster <- NULL
+
+# 9.5 multiplier represents # reads (x) * 95nt/read * 1 kb/1000nt * 100% = # reads * 9.5 = # Kb in entire genome for that class 
+Kbamount <- data.frame(annot_clust[1], apply(annot_clust[2:16], 2, function (x) x*9.5))
+KBsum <- aggregate(. ~Lineage, data=Kbamount, FUN=sum)
+
+KBsum$A1 <- rowMeans(KBsum[,2:4])
+KBsum$A2 <- rowMeans(KBsum[,5:9])
+KBsum$D5 <- rowMeans(KBsum[,10:14])
+
+KBsum$A1min <- apply(KBsum[,2:4], 1, min)
+KBsum$A2min <- apply(KBsum[,5:9], 1, min)
+KBsum$D5min <- apply(KBsum[,10:14], 1, min)
+KBsum$kirkiimin <- KBsum$kirkii
+KBsum$kokia_min <- KBsum$kokia_
+
+KBsum$A1max <- apply(KBsum[,2:4], 1, max)
+KBsum$A2max <- apply(KBsum[,5:9], 1, max)
+KBsum$D5max <- apply(KBsum[,10:14], 1, max)
+KBsum$kirkiimax <- KBsum$kirkii
+KBsum$kokia_max <- KBsum$kokia_
+
+KBsum <- KBsum[,-(2:14)]
+KBm <- melt(KBsum[,-(7:16)])
+min <- c(KBsum$kirkiimin, KBsum$kokia_min, KBsum$A1min, KBsum$A2min, KBsum$D5min)
+max <- c(KBsum$kirkiimax, KBsum$kokia_max, KBsum$A1max, KBsum$A2max, KBsum$D5max)
+KBm$min <- min
+KBm$max <- max
+
+limits <- aes(ymax=KBm$max, ymin=KBm$min)
+
+dodge <- position_dodge(width=0.9)
+
+png("Figure_TE.amounts.png", 1000, 1000, pointsize=20)
+
+ggplot(KBm, aes(x=Lineage, y=value, fill = variable)) + geom_bar(stat = "identity",position = dodge) + scale_y_log10() + scale_fill_manual(breaks=c("kirkii", "kokia_", "A1", "A2", "D5"), values=c("blue3", "green3", "orchid", "orchid4", "slategrey")) + geom_errorbar(limits, position = dodge)
+dev.off()
+
+sum(KBsum$kirkii)/1000
+[1] 110.3615
+sum(KBsum$kokia_)/1000
+[1] 109.4685
+
+
+#### kirkii vs kokia clusters ####
+
+png("Figure_TE.comparisons.png", 1000, 1000, pointsize=20)
+
+p1 <- ggplot(annot_clust, aes(x=kokia_, y=kirkii, shape=signK, color=signK)) + geom_point(size=2) + geom_abline(intercept=0, size=1) + scale_color_manual(breaks=c("positive", "negative"), values=c("blue3", "green3")) +  scale_x_continuous(expand = c(0, 0), limits=c(0,750)) + scale_y_continuous(expand = c(0, 0), limits=c(0,750))
+p2 <- ggplot(annot_clust[annot_clust$Lineage == "LTR", ], aes(x=kokia_, y=kirkii, shape= signK, color=signK)) + geom_point(size=2) + geom_abline(intercept=0, size=1)+ scale_color_manual(breaks=c("positive", "negative"), values=c("blue3", "green3"))+ scale_x_continuous(expand = c(0, 0), limits=c(0,400)) + scale_y_continuous(expand = c(0, 0), limits=c(0,400))
+p3 <- ggplot(annot_clust[annot_clust$Lineage == "LTR/Gypsy", ], aes(x=kokia_, y=kirkii, shape= signK, color=signK)) + geom_point(size=2) + geom_abline(intercept=0, size=1)+ scale_color_manual(breaks=c("positive", "negative"), values=c("blue3", "green3"))+ scale_x_continuous(expand = c(0, 0), limits=c(0,750)) + scale_y_continuous(expand = c(0, 0), limits=c(0,750))
+p4 <- ggplot(annot_clust[annot_clust$Lineage == "LTR/Copia", ], aes(x=kokia_, y=kirkii, shape= signK, color=signK)) + geom_point(size=2) + geom_abline(intercept=0, size=1)+ scale_color_manual(breaks=c("positive", "negative"), values=c("blue3", "green3"))+ scale_x_continuous(expand = c(0, 0), limits=c(0,150)) + scale_y_continuous(expand = c(0, 0), limits=c(0,150))
+
+grid.arrange(p1,p2,p3,p4, ncol=2)
+
+dev.off()
+
 
 
 

@@ -13,7 +13,7 @@ TXX	57.057	41.99	61.807	47.158	45.714	60.23	51.623	45.486	49.951	38.76	35.34	28.
 
 library(ggplot2)
 library(reshape2)
-stable <- read.table("clipboard", sep = "\t", header =TRUE)
+stable <- read.table("f.csv", sep = ",", header =TRUE)
 
 stable$A1 <- rowMeans(stable[,2:4])
 stable$A2 <- rowMeans(stable[,5:9])

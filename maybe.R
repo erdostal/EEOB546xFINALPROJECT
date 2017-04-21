@@ -13,29 +13,58 @@ melted <- melt(new_table)
 Y <- melted$value
 Species <- as.factor(melted$Var1)
 Cluster <- as.factor(melted$Var2)
-linear_model <- lm(Y~Cluster*Species)
+linear_model <- glm(Y~Cluster*Species)
 anova(linear_model) #same as in paper
 
 
 
 #Figure 4 (and maybe 3)
-new_table <- as.data.frame(t(cluster_table))
+
 new_table$A1ave <- rowMeans(subset(new_table, select = c(A1_155_, A1_073_, A1_097_), na.rm = TRUE))
 new_table$A2ave <- rowMeans(subset(new_table, select = c(A2_255_, A2_034_, A2_044_, A2_099_, A2_101_), na.rm = TRUE))
 
+
+new_table <- sweep(new_table, 2, colSums(new_table), FUN="/")
+A.only <- new_table[c(1,2,3,4,5,6,7,12),]
+A.only.melted <- melt(A.only)
+Y.data <- A.only.melted$value
+A.species <- as.factor(A.only.melted$Var1)
+A.clusters <- as.factor(A.only.melted$Var2)
+A.only.lm <- lm(Y.data~A.clusters*A.species)
+contrasts <- contrast(A.only.lm, list(A.clusters = levels(A.clusters), A.species = "A2"), list(A.clusters = levels(A.clusters), A.species = "A1"))
+
+
 A.averages <- subset(new_table, select = c(A1ave, A2ave))
 A.melted <- melt(t(A.averages))
-Y.data <- A.melted$value
-A.species <- as.factor(A.melted$Var1)
-A.clusters <- as.factor(A.melted$Var2)
-GLM_clusters <- lm(Y.data~A.species*A.clusters)
+
+
+
+
+#Trying Chi-square analyses
+chi_table <- new_table[,c(14,15)]
+#row.names(chi_table) <- row.names(new_table)
+chi_table <- chi_table[!(rowSums(chi_table[,c(1:2)])==0),]
+
+chi_table$p.value <- apply(chi_table[,c(1:2)], 1, function(x) chisq.test(x)$p.value)
+chi_table$statistic <- apply(chi_table[,c(1:2)], 1, function(x) chisq.test(x, simulate.p.value = TRUE)$statistic)
+chi_table$p.adjust <- p.adjust(chi_table$p.value, method="none")
+dim(chi_table[(chi_table$p.adjust < 0.05),])
+
+
+GLM_clusters <- lm(Y.data~A.clusters*A.species)
+summary(GLM_clusters)
+
+
+
 
 #GLM_clusters <- glm(Y~Cluster*Species)
 contrasts <- contrast(GLM_clusters, list(A.clusters = levels(A.clusters), A.species = "A2ave"), list(A.clusters = levels(A.clusters), A.species = "A1ave"))
 Pvalue <- contrasts$Pvalue
-test <- ifelse((Pvalue < 0.05),1,0)
+Pvalue <- p.adjust(Pvalue, method = "BH")
+test <- ifelse((Pvalue < 0.1305904065),1,0)
+max(test)
 sum(test)
-
+plot(Pvalue)
 ggplot(A1ave~A2ave, data=new_table, mapping = aes(x = A1ave, y = A2ave, color=significant)) + geom_point()
 
 

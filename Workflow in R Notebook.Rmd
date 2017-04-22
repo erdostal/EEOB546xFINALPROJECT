@@ -1,0 +1,94 @@
+---
+title: "Workflow of Final Project"
+output: html_notebook
+---
+
+##Part I. Clustering
+**1. Set up**
+```{r}
+library(lazyeval)
+library(ggplot2)
+library(geomorph)
+library(reshape2)
+#Package we used to replicate PCA (CAN NOT PRESENT THIS. CONFLICTS WITH PUBLICATION) 
+library(factoextra)
+
+# import file from comparative analysis table
+
+cluster_table <- read.table("table_clusters.txt", header = T)
+cluster_table <- as.data.frame(cluster_table)
+```
+
+**2. Sort table based on total number of clusters across species**
+```{r}
+cluster_table$sum <- rowSums(cluster_table)
+cluster_table <- cluster_table[order(-cluster_table$sum),]
+cluster_table <- subset(cluster_table, select = -c(sum))
+cluster_table <- head(cluster_table,1000)
+
+#creating table of A clusters (check final table, there was an A2 not in line with the rest of "A"s)
+Acluster_table <- cluster_table[,1:8]
+#creating table of D clusters
+Dcluster_table <- cluster_table[,9:13]
+```
+
+###Part II. Recreate the bar plot showing the abundance of the most common repeat types in the genomes of three *Gossypium* species (Figure 2)
+
+**1. Set up**
+```{r}
+library(ggplot2)
+library(reshape2)
+stable <- read.table("clipboard", sep = "\t", header =TRUE)
+```
+**2. **
+```{r}
+stable$A1 <- rowMeans(stable[,2:4])
+stable$A2 <- rowMeans(stable[,5:9])
+stable$D5 <- rowMeans(stable[,10:14])
+
+std <- function(x) sd(x)/sqrt(length(x))
+
+stable$A1err <- apply(stable[,2:4], 1, std)
+stable$A2err <- apply(stable[,5:9], 1, std)
+stable$D5err <- apply(stable[,10:14], 1, std)
+
+stable$A1min <- stable$A1 - stable$A1err
+stable$A2min <- stable$A2 - stable$A2err
+stable$D5min <- stable$D5 - stable$D5err
+
+stable$A1max <- stable$A1 + stable$A1err
+stable$A2max <- stable$A2 + stable$A2err
+stable$D5max <- stable$D5 + stable$D5err
+
+stable <- stable[,-(2:14)]
+
+melted <- melt(stable[,(1:4)])
+min <- c(stable$A1min, stable$A2min, stable$D5min)
+max <- c(stable$A1max, stable$A2max, stable$D5max)
+melted$min <- min
+melted$max <- max
+
+limits <- aes(ymax=melted$max, ymin=melted$min)
+
+dodge <- position_dodge(width=0.9)
+```
+
+**3. **
+
+```{r}
+png("Figure_TE.amounts.png", 7500, 5000, pointsize=12, res=600)
+
+ggplot(melted, aes(x=Lineage, y=value, fill = variable)) + geom_bar(stat = "identity",position = dodge) + geom_errorbar(limits, position = dodge, width=0.3) + labs(y="Mbp/1C", x="") + theme_set(theme_grey(base_size=12)) + scale_fill_hue(l=40)
+dev.off()
+
+```
+
+
+
+
+##Part III. Statistical Analysis of Cluster Abundance
+
+
+```{r}
+
+```

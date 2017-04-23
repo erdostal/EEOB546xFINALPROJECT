@@ -3,69 +3,80 @@ library(geomorph)
 library(reshape2)
 library(ggplot2)
 library(contrast)
+library(DESeq2)
 #input and structure data
 cluster_table <- t(head(as.matrix(read.table("table_clusters.txt", header = T)),1000))
 
-#two-way anova test (as done in the paper)
-new_table = cluster_table
+#Table 2 (two-way ANOVA test, as done in the paper)
+new_table <- cluster_table
 row.names(new_table) <- c("A1", "A1", "A1", "A2", "A2", "A2", "A2", "D5", "D5", "D5", "D5", "A2", "D5")
 melted <- melt(new_table)
 Y <- melted$value
 Species <- as.factor(melted$Var1)
 Cluster <- as.factor(melted$Var2)
-linear_model <- glm(Y~Cluster*Species)
+linear_model <- lm(Y~Cluster*Species)
 anova(linear_model) #same as in paper
 
 
 
-#Figure 4 (and maybe 3)
 
-new_table$A1ave <- rowMeans(subset(new_table, select = c(A1_155_, A1_073_, A1_097_), na.rm = TRUE))
-new_table$A2ave <- rowMeans(subset(new_table, select = c(A2_255_, A2_034_, A2_044_, A2_099_, A2_101_), na.rm = TRUE))
+###Figure 3 (with colors, but no BH correction) 
+#differences between this figure and Simon's figure is highlighted on Simon_Fig3_discrepency_noBH.png
 
+cluster_table <- as.data.frame(t(cluster_table))
+cluster_table$A1ave <- rowMeans(subset(cluster_table, select = c(A1_155_, A1_073_, A1_097_), na.rm = TRUE))
+cluster_table$A2ave <- rowMeans(subset(cluster_table, select = c(A2_255_, A2_034_, A2_044_, A2_099_, A2_101_), na.rm = TRUE))
+cluster_table$D5ave <- rowMeans(subset(cluster_table, select = c(D5_002_, D5_031_, D5_004_, D5_053_, D5_ggg_), na.rm = TRUE))
 
-new_table <- sweep(new_table, 2, colSums(new_table), FUN="/")
-A.only <- new_table[c(1,2,3,4,5,6,7,12),]
-A.only.melted <- melt(A.only)
-Y.data <- A.only.melted$value
-A.species <- as.factor(A.only.melted$Var1)
-A.clusters <- as.factor(A.only.melted$Var2)
-A.only.lm <- lm(Y.data~A.clusters*A.species)
-contrasts <- contrast(A.only.lm, list(A.clusters = levels(A.clusters), A.species = "A2"), list(A.clusters = levels(A.clusters), A.species = "A1"))
-
-
-A.averages <- subset(new_table, select = c(A1ave, A2ave))
-A.melted <- melt(t(A.averages))
+#Constrasts
+Contrast.A1.A2 <- contrast(linear_model, list(Cluster = levels(Cluster), Species = "A1"), list(Cluster = levels(Cluster), Species = "A2"))
+Contrast.A1.D5 <- contrast(linear_model, list(Cluster = levels(Cluster), Species = "A1"), list(Cluster = levels(Cluster), Species = "D5"))
+Contrast.A2.D5 <- contrast(linear_model, list(Cluster = levels(Cluster), Species = "A2"), list(Cluster = levels(Cluster), Species = "D5"))
 
 
+#A1A2 Differences
+cluster_table$A1A2.direction <- ifelse((Contrast.A1.A2$Pvalue < 0.05), 1,0)
+cluster_table$A1A2.sign <- sign(Contrast.A1.A2$testStat)
+cluster_table$A1A2.significant <- as.factor(cluster_table$A1A2.sign * cluster_table$A1A2.direction)
 
+#A1D5 Differences
+cluster_table$A1D5.direction <- ifelse((Contrast.A1.D5$Pvalue < 0.05), 1,0)
+cluster_table$A1D5.sign <- sign(Contrast.A1.D5$testStat)
+cluster_table$A1D5.significant <- as.factor(cluster_table$A1D5.sign * cluster_table$A1D5.direction)
 
-#Trying Chi-square analyses
-chi_table <- new_table[,c(14,15)]
-#row.names(chi_table) <- row.names(new_table)
-chi_table <- chi_table[!(rowSums(chi_table[,c(1:2)])==0),]
-
-chi_table$p.value <- apply(chi_table[,c(1:2)], 1, function(x) chisq.test(x)$p.value)
-chi_table$statistic <- apply(chi_table[,c(1:2)], 1, function(x) chisq.test(x, simulate.p.value = TRUE)$statistic)
-chi_table$p.adjust <- p.adjust(chi_table$p.value, method="none")
-dim(chi_table[(chi_table$p.adjust < 0.05),])
-
-
-GLM_clusters <- lm(Y.data~A.clusters*A.species)
-summary(GLM_clusters)
+#A2D5 Differences
+cluster_table$A2D5.direction <- ifelse((Contrast.A2.D5$Pvalue < 0.05), 1,0)
+cluster_table$A2D5.sign <- sign(Contrast.A2.D5$testStat)
+cluster_table$A2D5.significant <- as.factor(cluster_table$A2D5.sign * cluster_table$A2D5.direction)
 
 
 
+#Plotting Figure 3 (with colors, but no BH correction)
+ggplot(A1ave~A2ave, data=cluster_table, mapping = aes(x = A1ave, y = A2ave, color = A1A2.significant)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
+ggplot(A1ave~D5ave, data=cluster_table, mapping = aes(x = A1ave, y = D5ave, color = A1D5.significant)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
+ggplot(A2ave~D5ave, data=cluster_table, mapping = aes(x = A2ave, y = D5ave, color = A2D5.significant)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
 
-#GLM_clusters <- glm(Y~Cluster*Species)
-contrasts <- contrast(GLM_clusters, list(A.clusters = levels(A.clusters), A.species = "A2ave"), list(A.clusters = levels(A.clusters), A.species = "A1ave"))
-Pvalue <- contrasts$Pvalue
-Pvalue <- p.adjust(Pvalue, method = "BH")
-test <- ifelse((Pvalue < 0.1305904065),1,0)
-max(test)
-sum(test)
-plot(Pvalue)
-ggplot(A1ave~A2ave, data=new_table, mapping = aes(x = A1ave, y = A2ave, color=significant)) + geom_point()
+
+
+
+
+####Table 3 (not same numbers as paper, but same methods (excpet I didn't do BH correction))
+A1A2.clusters <- sum(cluster_table$A1A2.significant != 0)
+A1D5.clusters <- sum(cluster_table$A1D5.significant != 0)
+A2D5.clusters <- sum(cluster_table$A2D5.significant != 0)
+A1A2.clusters
+A1D5.clusters
+A2D5.clusters
+
+
+
+
+
+
+
+########################################################
+########### What Simon Should Have Done  ###############
+########################################################
 
 
 
@@ -98,19 +109,15 @@ A1.ancestral.rand.mean <- mean(A1.ancestral.species$random.SS)
 A1.ancestral.rand.sd <- sd(A1.ancestral.species$random.SS)
 A1.ancestral.species #significant
 
-
-
-
-
 #####Z-tests
 #can be compared to Z distribution. See Adams & Collyer, 2016 Evolution. "On the comparison of the strengthof morphological integration acrossmorphometric datasets "
 A1A2D5.z.test <- (((two.z-two.rand.mean)-(A1A2D5.z - A1A2D5.rand.mean)) / sqrt((two.rand.sd)^2 + (A1A2D5.rand.sd)^2))
 A1.ancestral.z.test <- (((two.z-two.rand.mean)-(A1.ancestral.z - A1.ancestral.rand.mean)) / sqrt((two.rand.sd)^2 + (A1.ancestral.rand.sd)^2))
 
 
-
-##results of z-test
+######results of z-test
 A1A2D5.z.test
 #p-value of x-score for 0.48 is .6844; for z-score of 0.49 is .6879
 A1.ancestral.z.test
 #p-value for Z-score of 0.57 is 0.7175; p-value for a-score of 0.58 is 0.7190 
+

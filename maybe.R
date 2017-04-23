@@ -35,28 +35,24 @@ Contrast.A2.D5 <- contrast(linear_model, list(Cluster = levels(Cluster), Species
 
 #A1A2 Differences
 cluster_table$A1A2.direction <- ifelse((Contrast.A1.A2$Pvalue < 0.05), 1,0)
+cluster_table$A1A2.direction.BH <- ifelse((p.adjust(Contrast.A1.A2$Pvalue, method = "BH") < 0.05), 1,0)
 cluster_table$A1A2.sign <- sign(Contrast.A1.A2$testStat)
 cluster_table$A1A2.significant <- as.factor(cluster_table$A1A2.sign * cluster_table$A1A2.direction)
+cluster_table$A1A2.significant.BH <- as.factor(cluster_table$A1A2.sign * cluster_table$A1A2.direction.BH)
 
 #A1D5 Differences
 cluster_table$A1D5.direction <- ifelse((Contrast.A1.D5$Pvalue < 0.05), 1,0)
+cluster_table$A1D5.direction.BH <- ifelse((p.adjust(Contrast.A1.D5$Pvalue, method = "BH") < 0.05), 1,0)
 cluster_table$A1D5.sign <- sign(Contrast.A1.D5$testStat)
 cluster_table$A1D5.significant <- as.factor(cluster_table$A1D5.sign * cluster_table$A1D5.direction)
+cluster_table$A1D5.significant.BH <- as.factor(cluster_table$A1D5.sign * cluster_table$A1D5.direction.BH)
 
 #A2D5 Differences
 cluster_table$A2D5.direction <- ifelse((Contrast.A2.D5$Pvalue < 0.05), 1,0)
+cluster_table$A2D5.direction.BH <- ifelse((p.adjust(Contrast.A2.D5$Pvalue, method = "BH") < 0.05), 1,0)
 cluster_table$A2D5.sign <- sign(Contrast.A2.D5$testStat)
 cluster_table$A2D5.significant <- as.factor(cluster_table$A2D5.sign * cluster_table$A2D5.direction)
-
-
-
-#Plotting Figure 3 (with colors, but no BH correction)
-ggplot(A1ave~A2ave, data=cluster_table, mapping = aes(x = A1ave, y = A2ave, color = A1A2.significant)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
-ggplot(A1ave~D5ave, data=cluster_table, mapping = aes(x = A1ave, y = D5ave, color = A1D5.significant)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
-ggplot(A2ave~D5ave, data=cluster_table, mapping = aes(x = A2ave, y = D5ave, color = A2D5.significant)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
-
-
-
+cluster_table$A2D5.significant.BH <- as.factor(cluster_table$A2D5.sign * cluster_table$A2D5.direction.BH)
 
 
 ####Table 3 (not same numbers as paper, but same methods (excpet I didn't do BH correction))
@@ -68,6 +64,25 @@ A1D5.clusters
 A2D5.clusters
 
 
+A1A2.clusters.BH <- sum(cluster_table$A1A2.significant.BH != 0)
+A1D5.clusters.BH <- sum(cluster_table$A1D5.significant.BH != 0)
+A2D5.clusters.BH <- sum(cluster_table$A2D5.significant.BH != 0)
+A1A2.clusters.BH
+A1D5.clusters.BH
+A2D5.clusters.BH
+
+
+
+
+#Plotting Figure 3 (With color, with and without BH correction)
+ggplot(A1ave~A2ave, data=cluster_table, mapping = aes(x = A1ave, y = A2ave, color = A1A2.significant)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
+ggplot(A1ave~A2ave, data=cluster_table, mapping = aes(x = A1ave, y = A2ave, color = A1A2.significant.BH)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
+
+ggplot(A1ave~D5ave, data=cluster_table, mapping = aes(x = A1ave, y = D5ave, color = A1D5.significant)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
+ggplot(A1ave~D5ave, data=cluster_table, mapping = aes(x = A1ave, y = D5ave, color = A1D5.significant.BH)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
+
+ggplot(A2ave~D5ave, data=cluster_table, mapping = aes(x = A2ave, y = D5ave, color = A2D5.significant)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
+ggplot(A2ave~D5ave, data=cluster_table, mapping = aes(x = A2ave, y = D5ave, color = A2D5.significant.BH)) + geom_point() + geom_abline(intercept = 0, slope = 1) + xlim(0, 3500) + ylim(0,3500)
 
 
 

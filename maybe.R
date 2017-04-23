@@ -3,7 +3,6 @@ library(geomorph)
 library(reshape2)
 library(ggplot2)
 library(contrast)
-library(DESeq2)
 #input and structure data
 cluster_table <- t(head(as.matrix(read.table("table_clusters.txt", header = T)),1000))
 

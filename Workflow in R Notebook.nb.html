@@ -172,112 +172,275 @@ $(document).ready(function () {
 
 
 <!-- rnb-text-begin -->
-<div id="part-i.-clustering" class="section level2">
-<h2>Part I. Clustering</h2>
+<div id="part-i.-clustering" class="section level3">
+<h3>Part I. Clustering</h3>
 <p><strong>1. Set up</strong></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShsYXp5ZXZhbClcbmxpYnJhcnkoZ2dwbG90MilcbmxpYnJhcnkoZ2VvbW9ycGgpXG5saWJyYXJ5KHJlc2hhcGUyKVxuI1BhY2thZ2Ugd2UgdXNlZCB0byByZXBsaWNhdGUgUENBIChDQU4gTk9UIFBSRVNFTlQgVEhJUy4gQ09ORkxJQ1RTIFdJVEggUFVCTElDQVRJT04pIFxubGlicmFyeShmYWN0b2V4dHJhKVxuXG4jIGltcG9ydCBmaWxlIGZyb20gY29tcGFyYXRpdmUgYW5hbHlzaXMgdGFibGVcblxuY2x1c3Rlcl90YWJsZSA8LSByZWFkLnRhYmxlKFwidGFibGVfY2x1c3RlcnMudHh0XCIsIGhlYWRlciA9IFQpXG5jbHVzdGVyX3RhYmxlIDwtIGFzLmRhdGEuZnJhbWUoY2x1c3Rlcl90YWJsZSlcbmBgYCJ9 -->
-<pre class="r"><code>library(lazyeval)
-library(ggplot2)
-library(geomorph)
-library(reshape2)
-#Package we used to replicate PCA (CAN NOT PRESENT THIS. CONFLICTS WITH PUBLICATION) 
-library(factoextra)
-
-# import file from comparative analysis table
-
-cluster_table &lt;- read.table(&quot;table_clusters.txt&quot;, header = T)
-cluster_table &lt;- as.data.frame(cluster_table)</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p><strong>2. Sort table based on total number of clusters across species</strong></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2x1c3Rlcl90YWJsZSRzdW0gPC0gcm93U3VtcyhjbHVzdGVyX3RhYmxlKVxuY2x1c3Rlcl90YWJsZSA8LSBjbHVzdGVyX3RhYmxlW29yZGVyKC1jbHVzdGVyX3RhYmxlJHN1bSksXVxuY2x1c3Rlcl90YWJsZSA8LSBzdWJzZXQoY2x1c3Rlcl90YWJsZSwgc2VsZWN0ID0gLWMoc3VtKSlcbmNsdXN0ZXJfdGFibGUgPC0gaGVhZChjbHVzdGVyX3RhYmxlLDEwMDApXG5cbiNjcmVhdGluZyB0YWJsZSBvZiBBIGNsdXN0ZXJzIChjaGVjayBmaW5hbCB0YWJsZSwgdGhlcmUgd2FzIGFuIEEyIG5vdCBpbiBsaW5lIHdpdGggdGhlIHJlc3Qgb2YgXCJBXCJzKVxuQWNsdXN0ZXJfdGFibGUgPC0gY2x1c3Rlcl90YWJsZVssMTo4XVxuI2NyZWF0aW5nIHRhYmxlIG9mIEQgY2x1c3RlcnNcbkRjbHVzdGVyX3RhYmxlIDwtIGNsdXN0ZXJfdGFibGVbLDk6MTNdXG5gYGAifQ== -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2x1c3Rlcl90YWJsZSRzdW0gPC0gcm93U3VtcyhjbHVzdGVyX3RhYmxlKVxuY2x1c3Rlcl90YWJsZSA8LSBjbHVzdGVyX3RhYmxlW29yZGVyKC1jbHVzdGVyX3RhYmxlJHN1bSksXVxuY2x1c3Rlcl90YWJsZSA8LSBzdWJzZXQoY2x1c3Rlcl90YWJsZSwgc2VsZWN0ID0gLWMoc3VtKSlcbmNsdXN0ZXJfdGFibGUgPC0gaGVhZChjbHVzdGVyX3RhYmxlLDEwMDApXG5gYGAifQ== -->
 <pre class="r"><code>cluster_table$sum &lt;- rowSums(cluster_table)
 cluster_table &lt;- cluster_table[order(-cluster_table$sum),]
 cluster_table &lt;- subset(cluster_table, select = -c(sum))
-cluster_table &lt;- head(cluster_table,1000)
-
-#creating table of A clusters (check final table, there was an A2 not in line with the rest of &quot;A&quot;s)
-Acluster_table &lt;- cluster_table[,1:8]
-#creating table of D clusters
-Dcluster_table &lt;- cluster_table[,9:13]</code></pre>
+cluster_table &lt;- head(cluster_table,1000)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p><strong>3. Creating table of A clusters and D clusters (check final table, there was an A2 not in line with the rest of “A”s)</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWNsdXN0ZXJfdGFibGUgPC0gY2x1c3Rlcl90YWJsZVssMTo4XSAjY3JlYXRpbmcgdGFibGUgb2YgQSBjbHVzdGVyc1xuRGNsdXN0ZXJfdGFibGUgPC0gY2x1c3Rlcl90YWJsZVssOToxM10gI2NyZWF0aW5nIHRhYmxlIG9mIEQgY2x1c3RlcnNcbmBgYCJ9 -->
+<pre class="r"><code>Acluster_table &lt;- cluster_table[,1:8] #creating table of A clusters
+Dcluster_table &lt;- cluster_table[,9:13] #creating table of D clusters</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>4. No normalization PCA??</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY2x1c3Rlcl90YWJsZSA8LSB0KGNsdXN0ZXJfdGFibGUpXG5jbHVzdGVyLnBjYSA8LSBwcmNvbXAoY2x1c3Rlcl90YWJsZSwgc2NhbGUgPSBUUlVFLCBuYS5ybSA9IFRSVUUpXG5pbmQuY29vcmQgPC0gY2x1c3Rlci5wY2EkeFxuYGBgIn0= -->
+<pre class="r"><code>cluster_table &lt;- t(cluster_table)
+cluster.pca &lt;- prcomp(cluster_table, scale = TRUE, na.rm = TRUE)
+ind.coord &lt;- cluster.pca$x</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>5. Subsetting data, taking first 1000 columns</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3Vic2VjdGlvbnMgPC0gYXMuZGF0YS5mcmFtZShjbHVzdGVyX3RhYmxlWywxOjJdKVxuc3Vic2VjdGlvbnMkc3ViIDwtYyhcIkExXCIsIFwiQTFcIiwgXCJBMVwiLCBcIkEyXCIsIFwiQTJcIiwgXCJBMlwiLCBcIkEyXCIsIFwiRDVcIiwgXCJENVwiLCBcIkQ1XCIsIFwiRDVcIiwgXCJBMlwiLCBcIkQ1XCIpXG5cbnN1YnNlY3Rpb25zIDwtIHN1YnNlY3Rpb25zWywtYygxOjIpXVxuc3ViZmFjIDwtIGFzLmZhY3RvcihzdWJzZWN0aW9ucylcblxucG5nKFwiY290dG9uX291dGdyb3VwLlBDQS5kaXJlY3QuYW5ub3QubmV3LnBuZ1wiLCAxMDAwLCAxMDAwLCBwb2ludHNpemU9MjApXG5mdml6X3BjYV9pbmQoY2x1c3Rlci5wY2EsIGhhYmlsbGFnZT1zdWJmYWMpICsgdGhlbWVfbWluaW1hbCgpXG5kZXYub2ZmKClcbmBgYCJ9 -->
+<pre class="r"><code>subsections &lt;- as.data.frame(cluster_table[,1:2])
+subsections$sub &lt;-c(&quot;A1&quot;, &quot;A1&quot;, &quot;A1&quot;, &quot;A2&quot;, &quot;A2&quot;, &quot;A2&quot;, &quot;A2&quot;, &quot;D5&quot;, &quot;D5&quot;, &quot;D5&quot;, &quot;D5&quot;, &quot;A2&quot;, &quot;D5&quot;)
+
+subsections &lt;- subsections[,-c(1:2)]
+subfac &lt;- as.factor(subsections)
+
+png(&quot;cotton_outgroup.PCA.direct.annot.new.png&quot;, 1000, 1000, pointsize=20)
+fviz_pca_ind(cluster.pca, habillage=subfac) + theme_minimal()
+dev.off()</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
 <div id="part-ii.-recreate-the-bar-plot-showing-the-abundance-of-the-most-common-repeat-types-in-the-genomes-of-three-gossypium-species-figure-2" class="section level3">
 <h3>Part II. Recreate the bar plot showing the abundance of the most common repeat types in the genomes of three <em>Gossypium</em> species (Figure 2)</h3>
 <p><strong>1. Set up</strong></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZ3Bsb3QyKVxubGlicmFyeShyZXNoYXBlMilcbnN0YWJsZSA8LSByZWFkLnRhYmxlKFwiY2xpcGJvYXJkXCIsIHNlcCA9IFwiXFx0XCIsIGhlYWRlciA9VFJVRSlcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZ3Bsb3QyKVxubGlicmFyeShyZXNoYXBlMilcbnN0YWJsZSA8LSByZWFkLnRhYmxlKFwiZi5jc3ZcIiwgc2VwID0gXCIsXCIsIGhlYWRlciA9VFJVRSkgI1JlYWQgaW4gZGF0YSBmcmFtZVxuYGBgIn0= -->
 <pre class="r"><code>library(ggplot2)
 library(reshape2)
-stable &lt;- read.table(&quot;clipboard&quot;, sep = &quot;\t&quot;, header =TRUE)</code></pre>
+stable &lt;- read.table(&quot;f.csv&quot;, sep = &quot;,&quot;, header =TRUE) #Read in data frame</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p><strong>2. </strong></p>
+<p><strong>2. Create new rows that are averages of each species</strong></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RhYmxlJEExIDwtIHJvd01lYW5zKHN0YWJsZVssMjo0XSlcbnN0YWJsZSRBMiA8LSByb3dNZWFucyhzdGFibGVbLDU6OV0pXG5zdGFibGUkRDUgPC0gcm93TWVhbnMoc3RhYmxlWywxMDoxNF0pXG5cbnN0ZCA8LSBmdW5jdGlvbih4KSBzZCh4KS9zcXJ0KGxlbmd0aCh4KSlcblxuc3RhYmxlJEExZXJyIDwtIGFwcGx5KHN0YWJsZVssMjo0XSwgMSwgc3RkKVxuc3RhYmxlJEEyZXJyIDwtIGFwcGx5KHN0YWJsZVssNTo5XSwgMSwgc3RkKVxuc3RhYmxlJEQ1ZXJyIDwtIGFwcGx5KHN0YWJsZVssMTA6MTRdLCAxLCBzdGQpXG5cbnN0YWJsZSRBMW1pbiA8LSBzdGFibGUkQTEgLSBzdGFibGUkQTFlcnJcbnN0YWJsZSRBMm1pbiA8LSBzdGFibGUkQTIgLSBzdGFibGUkQTJlcnJcbnN0YWJsZSRENW1pbiA8LSBzdGFibGUkRDUgLSBzdGFibGUkRDVlcnJcblxuc3RhYmxlJEExbWF4IDwtIHN0YWJsZSRBMSArIHN0YWJsZSRBMWVyclxuc3RhYmxlJEEybWF4IDwtIHN0YWJsZSRBMiArIHN0YWJsZSRBMmVyclxuc3RhYmxlJEQ1bWF4IDwtIHN0YWJsZSRENSArIHN0YWJsZSRENWVyclxuXG5zdGFibGUgPC0gc3RhYmxlWywtKDI6MTQpXVxuXG5tZWx0ZWQgPC0gbWVsdChzdGFibGVbLCgxOjQpXSlcbm1pbiA8LSBjKHN0YWJsZSRBMW1pbiwgc3RhYmxlJEEybWluLCBzdGFibGUkRDVtaW4pXG5tYXggPC0gYyhzdGFibGUkQTFtYXgsIHN0YWJsZSRBMm1heCwgc3RhYmxlJEQ1bWF4KVxubWVsdGVkJG1pbiA8LSBtaW5cbm1lbHRlZCRtYXggPC0gbWF4XG5cbmxpbWl0cyA8LSBhZXMoeW1heD1tZWx0ZWQkbWF4LCB5bWluPW1lbHRlZCRtaW4pXG5cbmRvZGdlIDwtIHBvc2l0aW9uX2RvZGdlKHdpZHRoPTAuOSlcbmBgYCJ9 -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RhYmxlJEExIDwtIHJvd01lYW5zKHN0YWJsZVssMjo0XSlcbnN0YWJsZSRBMiA8LSByb3dNZWFucyhzdGFibGVbLDU6OV0pXG5zdGFibGUkRDUgPC0gcm93TWVhbnMoc3RhYmxlWywxMDoxNF0pXG5gYGAifQ== -->
 <pre class="r"><code>stable$A1 &lt;- rowMeans(stable[,2:4])
 stable$A2 &lt;- rowMeans(stable[,5:9])
-stable$D5 &lt;- rowMeans(stable[,10:14])
-
-std &lt;- function(x) sd(x)/sqrt(length(x))
-
-stable$A1err &lt;- apply(stable[,2:4], 1, std)
+stable$D5 &lt;- rowMeans(stable[,10:14])</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>3. Create standard deviation function</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RkIDwtIGZ1bmN0aW9uKHgpIHNkKHgpL3NxcnQobGVuZ3RoKHgpKVxuYGBgIn0= -->
+<pre class="r"><code>std &lt;- function(x) sd(x)/sqrt(length(x))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>4. Find standard deviation of each species</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RhYmxlJEExZXJyIDwtIGFwcGx5KHN0YWJsZVssMjo0XSwgMSwgc3RkKVxuc3RhYmxlJEEyZXJyIDwtIGFwcGx5KHN0YWJsZVssNTo5XSwgMSwgc3RkKVxuc3RhYmxlJEQ1ZXJyIDwtIGFwcGx5KHN0YWJsZVssMTA6MTRdLCAxLCBzdGQpXG5gYGAifQ== -->
+<pre class="r"><code>stable$A1err &lt;- apply(stable[,2:4], 1, std)
 stable$A2err &lt;- apply(stable[,5:9], 1, std)
-stable$D5err &lt;- apply(stable[,10:14], 1, std)
-
-stable$A1min &lt;- stable$A1 - stable$A1err
+stable$D5err &lt;- apply(stable[,10:14], 1, std)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>5. Create Standard Deviation minimum</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RhYmxlJEExbWluIDwtIHN0YWJsZSRBMSAtIHN0YWJsZSRBMWVyclxuc3RhYmxlJEEybWluIDwtIHN0YWJsZSRBMiAtIHN0YWJsZSRBMmVyclxuc3RhYmxlJEQ1bWluIDwtIHN0YWJsZSRENSAtIHN0YWJsZSRENWVyclxuYGBgIn0= -->
+<pre class="r"><code>stable$A1min &lt;- stable$A1 - stable$A1err
 stable$A2min &lt;- stable$A2 - stable$A2err
-stable$D5min &lt;- stable$D5 - stable$D5err
-
-stable$A1max &lt;- stable$A1 + stable$A1err
+stable$D5min &lt;- stable$D5 - stable$D5err</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>6. Create Standard Deviation maximum</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RhYmxlJEExbWF4IDwtIHN0YWJsZSRBMSArIHN0YWJsZSRBMWVyclxuc3RhYmxlJEEybWF4IDwtIHN0YWJsZSRBMiArIHN0YWJsZSRBMmVyclxuc3RhYmxlJEQ1bWF4IDwtIHN0YWJsZSRENSArIHN0YWJsZSRENWVyclxuYGBgIn0= -->
+<pre class="r"><code>stable$A1max &lt;- stable$A1 + stable$A1err
 stable$A2max &lt;- stable$A2 + stable$A2err
-stable$D5max &lt;- stable$D5 + stable$D5err
-
-stable &lt;- stable[,-(2:14)]
-
-melted &lt;- melt(stable[,(1:4)])
+stable$D5max &lt;- stable$D5 + stable$D5err</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>7. Remove categorizations of TE that we don’t care about</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc3RhYmxlIDwtIHN0YWJsZVssLSgyOjE0KV1cbmBgYCJ9 -->
+<pre class="r"><code>stable &lt;- stable[,-(2:14)]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>8. Melt dataframe in order to plot properly</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVsdGVkIDwtIG1lbHQoc3RhYmxlWywoMTo0KV0pXG5taW4gPC0gYyhzdGFibGUkQTFtaW4sIHN0YWJsZSRBMm1pbiwgc3RhYmxlJEQ1bWluKVxubWF4IDwtIGMoc3RhYmxlJEExbWF4LCBzdGFibGUkQTJtYXgsIHN0YWJsZSRENW1heClcbm1lbHRlZCRtaW4gPC0gbWluXG5tZWx0ZWQkbWF4IDwtIG1heFxuYGBgIn0= -->
+<pre class="r"><code>melted &lt;- melt(stable[,(1:4)])
 min &lt;- c(stable$A1min, stable$A2min, stable$D5min)
 max &lt;- c(stable$A1max, stable$A2max, stable$D5max)
 melted$min &lt;- min
-melted$max &lt;- max
-
-limits &lt;- aes(ymax=melted$max, ymin=melted$min)
-
-dodge &lt;- position_dodge(width=0.9)</code></pre>
+melted$max &lt;- max</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p><strong>3. </strong></p>
+<p><strong>9. Create standard error bars</strong></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucG5nKFwiRmlndXJlX1RFLmFtb3VudHMucG5nXCIsIDc1MDAsIDUwMDAsIHBvaW50c2l6ZT0xMiwgcmVzPTYwMClcblxuZ2dwbG90KG1lbHRlZCwgYWVzKHg9TGluZWFnZSwgeT12YWx1ZSwgZmlsbCA9IHZhcmlhYmxlKSkgKyBnZW9tX2JhcihzdGF0ID0gXCJpZGVudGl0eVwiLHBvc2l0aW9uID0gZG9kZ2UpICsgZ2VvbV9lcnJvcmJhcihsaW1pdHMsIHBvc2l0aW9uID0gZG9kZ2UsIHdpZHRoPTAuMykgKyBsYWJzKHk9XCJNYnAvMUNcIiwgeD1cIlwiKSArIHRoZW1lX3NldCh0aGVtZV9ncmV5KGJhc2Vfc2l6ZT0xMikpICsgc2NhbGVfZmlsbF9odWUobD00MClcbmRldi5vZmYoKVxuXG5gYGAifQ== -->
-<pre class="r"><code>png(&quot;Figure_TE.amounts.png&quot;, 7500, 5000, pointsize=12, res=600)
-
-ggplot(melted, aes(x=Lineage, y=value, fill = variable)) + geom_bar(stat = &quot;identity&quot;,position = dodge) + geom_errorbar(limits, position = dodge, width=0.3) + labs(y=&quot;Mbp/1C&quot;, x=&quot;&quot;) + theme_set(theme_grey(base_size=12)) + scale_fill_hue(l=40)
-dev.off()
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGltaXRzIDwtIGFlcyh5bWF4PW1lbHRlZCRtYXgsIHltaW49bWVsdGVkJG1pbilcbmBgYCJ9 -->
+<pre class="r"><code>limits &lt;- aes(ymax=melted$max, ymin=melted$min)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>10. Maintain width of bars</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZG9kZ2UgPC0gcG9zaXRpb25fZG9kZ2Uod2lkdGg9MC45KVxuYGBgIn0= -->
+<pre class="r"><code>dodge &lt;- position_dodge(width=0.9)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>11. Create image space</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucG5nKFwiRmlndXJlX1RFLmFtb3VudHMucG5nXCIsIDc1MDAsIDUwMDAsIHBvaW50c2l6ZT0xMiwgcmVzPTYwMClcbmBgYCJ9 -->
+<pre class="r"><code>png(&quot;Figure_TE.amounts.png&quot;, 7500, 5000, pointsize=12, res=600)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>12. Plot within image space</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KG1lbHRlZCwgYWVzKHg9TGluZWFnZSwgeT12YWx1ZSwgZmlsbCA9IHZhcmlhYmxlKSkgKyBnZW9tX2JhcihzdGF0ID0gXCJpZGVudGl0eVwiLHBvc2l0aW9uID0gZG9kZ2UpICsgZ2VvbV9lcnJvcmJhcihsaW1pdHMsIHBvc2l0aW9uID0gZG9kZ2UsIHdpZHRoPTAuMykgKyBsYWJzKHk9XCJNYnAvMUNcIiwgeD1cIlwiKSArIHRoZW1lX3NldCh0aGVtZV9ncmV5KGJhc2Vfc2l6ZT0xMikpICsgc2NhbGVfZmlsbF9odWUobD00MClcbmRldi5vZmYoKVxuYGBgIn0= -->
+<pre class="r"><code>ggplot(melted, aes(x=Lineage, y=value, fill = variable)) + geom_bar(stat = &quot;identity&quot;,position = dodge) + geom_errorbar(limits, position = dodge, width=0.3) + labs(y=&quot;Mbp/1C&quot;, x=&quot;&quot;) + theme_set(theme_grey(base_size=12)) + scale_fill_hue(l=40)
+dev.off()</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
-</div>
-<div id="part-iii.-statistical-analysis-of-cluster-abundance" class="section level2">
-<h2>Part III. Statistical Analysis of Cluster Abundance</h2>
+<div id="part-iii.-recreate-the-two-way-anova-of-cluster-abundance-among-the-largest-1000-clusters-in-four-gossypium-species-table-2" class="section level3">
+<h3>Part III. Recreate the two-way ANOVA of cluster abundance among the largest 1000 clusters in four <em>Gossypium</em> species (Table 2)</h3>
+<p><strong>1. Set up</strong></p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShyZXNoYXBlMilcbm5ld190YWJsZSA9IGNsdXN0ZXJfdGFibGVcbnJvdy5uYW1lcyhuZXdfdGFibGUpIDwtIGMoXCJBMVwiLCBcIkExXCIsIFwiQTFcIiwgXCJBMlwiLCBcIkEyXCIsIFwiQTJcIiwgXCJBMlwiLCBcIkQ1XCIsIFwiRDVcIiwgXCJENVwiLCBcIkQ1XCIsIFwiQTJcIiwgXCJENVwiKVxuYGBgIn0= -->
+<pre class="r"><code>library(reshape2)
+new_table = cluster_table
+row.names(new_table) &lt;- c(&quot;A1&quot;, &quot;A1&quot;, &quot;A1&quot;, &quot;A2&quot;, &quot;A2&quot;, &quot;A2&quot;, &quot;A2&quot;, &quot;D5&quot;, &quot;D5&quot;, &quot;D5&quot;, &quot;D5&quot;, &quot;A2&quot;, &quot;D5&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>2. Melt dataframe in order to plot properly</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVsdGVkIDwtIG1lbHQobmV3X3RhYmxlKVxuWSA8LSBtZWx0ZWQkdmFsdWVcblNwZWNpZXMgPC0gYXMuZmFjdG9yKG1lbHRlZCRWYXIxKVxuQ2x1c3RlciA8LSBhcy5mYWN0b3IobWVsdGVkJFZhcjIpXG5gYGAifQ== -->
+<pre class="r"><code>melted &lt;- melt(new_table)
+Y &lt;- melted$value
+Species &lt;- as.factor(melted$Var1)
+Cluster &lt;- as.factor(melted$Var2)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>3. ANOVA</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYW5vdmEobG0oWX5DbHVzdGVyKlNwZWNpZXMpKVxuYGBgIn0= -->
+<pre class="r"><code>anova(lm(Y~Cluster*Species))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="part-iv.-recreate-scatter-plot-of-cluster-abundance-in-gossypium-herbaceuma1-and-gossypium-arboreuma2-figure-3" class="section level3">
+<h3>Part IV. Recreate scatter plot of cluster abundance in <em>Gossypium herbaceum</em>(A1) and <em>Gossypium arboreum</em>(A2) (Figure 3)</h3>
+<p><strong>1. Set up</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShnZ3Bsb3QyKVxubmV3X3RhYmxlIDwtIGFzLmRhdGEuZnJhbWUodChjbHVzdGVyX3RhYmxlKSlcbm5ld190YWJsZSRBMWF2ZSA8LSByb3dNZWFucyhzdWJzZXQobmV3X3RhYmxlLCBzZWxlY3QgPSBjKEExXzE1NV8sIEExXzA3M18sIEExXzA5N18pLCBuYS5ybSA9IFRSVUUpKVxubmV3X3RhYmxlJEEyYXZlIDwtIHJvd01lYW5zKHN1YnNldChuZXdfdGFibGUsIHNlbGVjdCA9IGMoQTJfMjU1XywgQTJfMDM0XywgQTJfMDQ0XywgQTJfMDk5XywgQTJfMTAxXyksIG5hLnJtID0gVFJVRSkpXG5gYGAifQ== -->
+<pre class="r"><code>library(ggplot2)
+new_table &lt;- as.data.frame(t(cluster_table))
+new_table$A1ave &lt;- rowMeans(subset(new_table, select = c(A1_155_, A1_073_, A1_097_), na.rm = TRUE))
+new_table$A2ave &lt;- rowMeans(subset(new_table, select = c(A2_255_, A2_034_, A2_044_, A2_099_, A2_101_), na.rm = TRUE))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>2. Create the scatter plot</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2dwbG90KEExYXZlfkEyYXZlLCBkYXRhPW5ld190YWJsZSwgbWFwcGluZyA9IGFlcyh4ID0gQTFhdmUsIHkgPSBBMmF2ZSkpICsgZ2VvbV9wb2ludCgpICsgZ2VvbV9hYmxpbmUoaW50ZXJjZXB0PTAsIHNsb3BlPTEpXG5cbnBuZyhcImNvdHRvbi5vcmRpbmF0aW9uLnBuZ1wiLCA1MDAwLCA1MDAwLCBwb2ludHNpemU9MTIsIHJlcz02MDApXG5nZ3Bsb3QoY21kcG9pbnRzLCBhZXMoeD1WMSwgeT1WMiwgY29sb3I9Z2Vub21lLCBzaGFwZT1nZW5vbWUpKSArIGdlb21fcG9pbnQoc2l6ZT0yKSArIHhsYWIoXCJQQ29BIGNvbXBvbmVudCAxXCIpICsgeWxhYihcIlBDb0EgY29tcG9uZW50IDJcIikgKyBzY2FsZV9jb2xvcl9tYW51YWwodmFsdWVzPWMoXCJBMVwiPVwib3JjaGlkXCIsIFwiQTJcIj1cIm9yY2hpZDRcIiwgXCJENVwiPVwic2xhdGVncmV5XCIsXCJraXJraWlcIj1cImJsdWUzXCIsIFwia29raWFcIj1cImdyZWVuM1wiKSkrIGdlb21fdGV4dF9yZXBlbChhZXMobGFiZWw9c3BlY2llcykpIyMjIFJlY3JlYXRlIEZpZ3VyZSA0IFNpbW9uJ3Mgd2F5XG5teWRhdGEgPC0gdChhbm5vdF9jbHVzdFssLWMoMSldKVxuZCA8LSBkaXN0KG15ZGF0YSwgbWV0aG9kID0gXCJldWNsaWRlYW5cIilcblxuY21kZml0IDwtIGNtZHNjYWxlKGQsZWlnPVRSVUUsIGs9MikgIyBrIGlzIHRoZSBudW1iZXIgb2YgZGltXG5cbnggPC0gY21kZml0JHBvaW50c1ssMV1cbnkgPC0gY21kZml0JHBvaW50c1ssMl1cbnBsb3QoeCwgeSwgeGxhYj1cIkNvb3JkaW5hdGUgMVwiLCB5bGFiPVwiQ29vcmRpbmF0ZSAyXCIsIFxuICAgICBtYWluPVwiTWV0cmljICAgICAgICBNRFNcIiwgICAgICAgIHR5cGU9XCJuXCIpXG50ZXh0KHgsIHksIGxhYmVscyA9IHJvdy5uYW1lcyhteWRhdGEpLCBjZXg9LjcpXG5gYGAifQ== -->
+<pre class="r"><code>ggplot(A1ave~A2ave, data=new_table, mapping = aes(x = A1ave, y = A2ave)) + geom_point() + geom_abline(intercept=0, slope=1)
+
+png(&quot;cotton.ordination.png&quot;, 5000, 5000, pointsize=12, res=600)
+ggplot(cmdpoints, aes(x=V1, y=V2, color=genome, shape=genome)) + geom_point(size=2) + xlab(&quot;PCoA component 1&quot;) + ylab(&quot;PCoA component 2&quot;) + scale_color_manual(values=c(&quot;A1&quot;=&quot;orchid&quot;, &quot;A2&quot;=&quot;orchid4&quot;, &quot;D5&quot;=&quot;slategrey&quot;,&quot;kirkii&quot;=&quot;blue3&quot;, &quot;kokia&quot;=&quot;green3&quot;))+ geom_text_repel(aes(label=species))### Recreate Figure 4 Simon's way
+mydata &lt;- t(annot_clust[,-c(1)])
+d &lt;- dist(mydata, method = &quot;euclidean&quot;)
+
+cmdfit &lt;- cmdscale(d,eig=TRUE, k=2) # k is the number of dim
+
+x &lt;- cmdfit$points[,1]
+y &lt;- cmdfit$points[,2]
+plot(x, y, xlab=&quot;Coordinate 1&quot;, ylab=&quot;Coordinate 2&quot;, 
+     main=&quot;Metric        MDS&quot;,        type=&quot;n&quot;)
+text(x, y, labels = row.names(mydata), cex=.7)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+<div id="part-v.-recreate-the-plot-showing-cotton-samples-grouped-by-repeat-content-figure-4" class="section level3">
+<h3>Part V. Recreate the plot showing cotton samples grouped by repeat content (Figure 4)</h3>
+<p><strong>1. Make the euclidean distance matrix</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZCA8LSBkaXN0KGNsdXN0ZXJfdGFibGUsIG1ldGhvZCA9IFwiZXVjbGlkZWFuXCIpXG5gYGAifQ== -->
+<pre class="r"><code>d &lt;- dist(cluster_table, method = &quot;euclidean&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>2. Using cmdscale to perform classical MDS (principal coordinate analysis)</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuY21kZml0IDwtIGNtZHNjYWxlKGQsZWlnPVRSVUUsIGs9MikgIyBrIGlzIHRoZSBudW1iZXIgb2YgZGltXG54IDwtIGNtZGZpdCRwb2ludHNbLDFdXG55IDwtIGNtZGZpdCRwb2ludHNbLDJdXG5gYGAifQ== -->
+<pre class="r"><code>cmdfit &lt;- cmdscale(d,eig=TRUE, k=2) # k is the number of dim
+x &lt;- cmdfit$points[,1]
+y &lt;- cmdfit$points[,2]</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>3. Make the plot</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucG5nKFwiU1JCLkZpZzQucG5nXCIsIDUwMDAsIDUwMDAsIHBvaW50c2l6ZT0xMiwgcmVzPTYwMClcbnBsb3QoeCwgeSwgeGxhYj1cIkNvb3JkaW5hdGUgMVwiLCB5bGFiPVwiQ29vcmRpbmF0ZSAyXCIsIG1haW49XCJNZXRyaWMgTURTXCIsXHR0eXBlPVwiblwiKVxudGV4dCh4LCB5LCBsYWJlbHMgPSByb3cubmFtZXMoY2x1c3Rlcl90YWJsZSksIGNleD0uNylcbnBvaW50cyh4LCB5LCBwY2g9MTkpXG5kZXYub2ZmKClcbmBgYCJ9 -->
+<pre class="r"><code>png(&quot;SRB.Fig4.png&quot;, 5000, 5000, pointsize=12, res=600)
+plot(x, y, xlab=&quot;Coordinate 1&quot;, ylab=&quot;Coordinate 2&quot;, main=&quot;Metric MDS&quot;, type=&quot;n&quot;)
+text(x, y, labels = row.names(cluster_table), cex=.7)
+points(x, y, pch=19)
+dev.off()</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIldvcmtmbG93IG9mIEZpbmFsIFByb2plY3QiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQojI1BhcnQgSS4gQ2x1c3RlcmluZw0KKioxLiBTZXQgdXAqKg0KYGBge3J9DQpsaWJyYXJ5KGxhenlldmFsKQ0KbGlicmFyeShnZ3Bsb3QyKQ0KbGlicmFyeShnZW9tb3JwaCkNCmxpYnJhcnkocmVzaGFwZTIpDQojUGFja2FnZSB3ZSB1c2VkIHRvIHJlcGxpY2F0ZSBQQ0EgKENBTiBOT1QgUFJFU0VOVCBUSElTLiBDT05GTElDVFMgV0lUSCBQVUJMSUNBVElPTikgDQpsaWJyYXJ5KGZhY3RvZXh0cmEpDQoNCiMgaW1wb3J0IGZpbGUgZnJvbSBjb21wYXJhdGl2ZSBhbmFseXNpcyB0YWJsZQ0KDQpjbHVzdGVyX3RhYmxlIDwtIHJlYWQudGFibGUoInRhYmxlX2NsdXN0ZXJzLnR4dCIsIGhlYWRlciA9IFQpDQpjbHVzdGVyX3RhYmxlIDwtIGFzLmRhdGEuZnJhbWUoY2x1c3Rlcl90YWJsZSkNCmBgYA0KDQoqKjIuIFNvcnQgdGFibGUgYmFzZWQgb24gdG90YWwgbnVtYmVyIG9mIGNsdXN0ZXJzIGFjcm9zcyBzcGVjaWVzKioNCmBgYHtyfQ0KY2x1c3Rlcl90YWJsZSRzdW0gPC0gcm93U3VtcyhjbHVzdGVyX3RhYmxlKQ0KY2x1c3Rlcl90YWJsZSA8LSBjbHVzdGVyX3RhYmxlW29yZGVyKC1jbHVzdGVyX3RhYmxlJHN1bSksXQ0KY2x1c3Rlcl90YWJsZSA8LSBzdWJzZXQoY2x1c3Rlcl90YWJsZSwgc2VsZWN0ID0gLWMoc3VtKSkNCmNsdXN0ZXJfdGFibGUgPC0gaGVhZChjbHVzdGVyX3RhYmxlLDEwMDApDQoNCiNjcmVhdGluZyB0YWJsZSBvZiBBIGNsdXN0ZXJzIChjaGVjayBmaW5hbCB0YWJsZSwgdGhlcmUgd2FzIGFuIEEyIG5vdCBpbiBsaW5lIHdpdGggdGhlIHJlc3Qgb2YgIkEicykNCkFjbHVzdGVyX3RhYmxlIDwtIGNsdXN0ZXJfdGFibGVbLDE6OF0NCiNjcmVhdGluZyB0YWJsZSBvZiBEIGNsdXN0ZXJzDQpEY2x1c3Rlcl90YWJsZSA8LSBjbHVzdGVyX3RhYmxlWyw5OjEzXQ0KYGBgDQoNCiMjI1BhcnQgSUkuIFJlY3JlYXRlIHRoZSBiYXIgcGxvdCBzaG93aW5nIHRoZSBhYnVuZGFuY2Ugb2YgdGhlIG1vc3QgY29tbW9uIHJlcGVhdCB0eXBlcyBpbiB0aGUgZ2Vub21lcyBvZiB0aHJlZSAqR29zc3lwaXVtKiBzcGVjaWVzIChGaWd1cmUgMikNCg0KKioxLiBTZXQgdXAqKg0KYGBge3J9DQpsaWJyYXJ5KGdncGxvdDIpDQpsaWJyYXJ5KHJlc2hhcGUyKQ0Kc3RhYmxlIDwtIHJlYWQudGFibGUoImNsaXBib2FyZCIsIHNlcCA9ICJcdCIsIGhlYWRlciA9VFJVRSkNCmBgYA0KKioyLiAqKg0KYGBge3J9DQpzdGFibGUkQTEgPC0gcm93TWVhbnMoc3RhYmxlWywyOjRdKQ0Kc3RhYmxlJEEyIDwtIHJvd01lYW5zKHN0YWJsZVssNTo5XSkNCnN0YWJsZSRENSA8LSByb3dNZWFucyhzdGFibGVbLDEwOjE0XSkNCg0Kc3RkIDwtIGZ1bmN0aW9uKHgpIHNkKHgpL3NxcnQobGVuZ3RoKHgpKQ0KDQpzdGFibGUkQTFlcnIgPC0gYXBwbHkoc3RhYmxlWywyOjRdLCAxLCBzdGQpDQpzdGFibGUkQTJlcnIgPC0gYXBwbHkoc3RhYmxlWyw1OjldLCAxLCBzdGQpDQpzdGFibGUkRDVlcnIgPC0gYXBwbHkoc3RhYmxlWywxMDoxNF0sIDEsIHN0ZCkNCg0Kc3RhYmxlJEExbWluIDwtIHN0YWJsZSRBMSAtIHN0YWJsZSRBMWVycg0Kc3RhYmxlJEEybWluIDwtIHN0YWJsZSRBMiAtIHN0YWJsZSRBMmVycg0Kc3RhYmxlJEQ1bWluIDwtIHN0YWJsZSRENSAtIHN0YWJsZSRENWVycg0KDQpzdGFibGUkQTFtYXggPC0gc3RhYmxlJEExICsgc3RhYmxlJEExZXJyDQpzdGFibGUkQTJtYXggPC0gc3RhYmxlJEEyICsgc3RhYmxlJEEyZXJyDQpzdGFibGUkRDVtYXggPC0gc3RhYmxlJEQ1ICsgc3RhYmxlJEQ1ZXJyDQoNCnN0YWJsZSA8LSBzdGFibGVbLC0oMjoxNCldDQoNCm1lbHRlZCA8LSBtZWx0KHN0YWJsZVssKDE6NCldKQ0KbWluIDwtIGMoc3RhYmxlJEExbWluLCBzdGFibGUkQTJtaW4sIHN0YWJsZSRENW1pbikNCm1heCA8LSBjKHN0YWJsZSRBMW1heCwgc3RhYmxlJEEybWF4LCBzdGFibGUkRDVtYXgpDQptZWx0ZWQkbWluIDwtIG1pbg0KbWVsdGVkJG1heCA8LSBtYXgNCg0KbGltaXRzIDwtIGFlcyh5bWF4PW1lbHRlZCRtYXgsIHltaW49bWVsdGVkJG1pbikNCg0KZG9kZ2UgPC0gcG9zaXRpb25fZG9kZ2Uod2lkdGg9MC45KQ0KYGBgDQoNCioqMy4gKioNCg0KYGBge3J9DQpwbmcoIkZpZ3VyZV9URS5hbW91bnRzLnBuZyIsIDc1MDAsIDUwMDAsIHBvaW50c2l6ZT0xMiwgcmVzPTYwMCkNCg0KZ2dwbG90KG1lbHRlZCwgYWVzKHg9TGluZWFnZSwgeT12YWx1ZSwgZmlsbCA9IHZhcmlhYmxlKSkgKyBnZW9tX2JhcihzdGF0ID0gImlkZW50aXR5Iixwb3NpdGlvbiA9IGRvZGdlKSArIGdlb21fZXJyb3JiYXIobGltaXRzLCBwb3NpdGlvbiA9IGRvZGdlLCB3aWR0aD0wLjMpICsgbGFicyh5PSJNYnAvMUMiLCB4PSIiKSArIHRoZW1lX3NldCh0aGVtZV9ncmV5KGJhc2Vfc2l6ZT0xMikpICsgc2NhbGVfZmlsbF9odWUobD00MCkNCmRldi5vZmYoKQ0KDQpgYGANCg0KDQoNCg0KIyNQYXJ0IElJSS4gU3RhdGlzdGljYWwgQW5hbHlzaXMgb2YgQ2x1c3RlciBBYnVuZGFuY2UNCg0KDQpgYGB7cn0NCg0KYGBg</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIldvcmtmbG93IG9mIEZpbmFsIFByb2plY3QiDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQoNCiMjI1BhcnQgSS4gQ2x1c3RlcmluZw0KDQoqKjEuIFNldCB1cCoqDQpgYGB7cn0NCmxpYnJhcnkobGF6eWV2YWwpDQpsaWJyYXJ5KGdncGxvdDIpDQpsaWJyYXJ5KGZhY3RvZXh0cmEpDQpjbHVzdGVyX3RhYmxlIDwtIHJlYWQudGFibGUoInRhYmxlX2NsdXN0ZXJzLnR4dCIsIGhlYWRlciA9IFQpICMgaW1wb3J0IGZpbGUgZnJvbSBjb21wYXJhdGl2ZSBhbmFseXNpcyB0YWJsZQ0KY2x1c3Rlcl90YWJsZSA8LSBhcy5kYXRhLmZyYW1lKGNsdXN0ZXJfdGFibGUpDQpgYGANCg0KKioyLiBTb3J0IHRhYmxlIGJhc2VkIG9uIHRvdGFsIG51bWJlciBvZiBjbHVzdGVycyBhY3Jvc3Mgc3BlY2llcyoqDQpgYGB7cn0NCmNsdXN0ZXJfdGFibGUkc3VtIDwtIHJvd1N1bXMoY2x1c3Rlcl90YWJsZSkNCmNsdXN0ZXJfdGFibGUgPC0gY2x1c3Rlcl90YWJsZVtvcmRlcigtY2x1c3Rlcl90YWJsZSRzdW0pLF0NCmNsdXN0ZXJfdGFibGUgPC0gc3Vic2V0KGNsdXN0ZXJfdGFibGUsIHNlbGVjdCA9IC1jKHN1bSkpDQpjbHVzdGVyX3RhYmxlIDwtIGhlYWQoY2x1c3Rlcl90YWJsZSwxMDAwKQ0KYGBgDQoNCioqMy4gQ3JlYXRpbmcgdGFibGUgb2YgQSBjbHVzdGVycyBhbmQgRCBjbHVzdGVycyAoY2hlY2sgZmluYWwgdGFibGUsIHRoZXJlIHdhcyBhbiBBMiBub3QgaW4gbGluZSB3aXRoIHRoZSByZXN0IG9mICJBInMpKioNCmBgYHtyfQ0KQWNsdXN0ZXJfdGFibGUgPC0gY2x1c3Rlcl90YWJsZVssMTo4XSAjY3JlYXRpbmcgdGFibGUgb2YgQSBjbHVzdGVycw0KRGNsdXN0ZXJfdGFibGUgPC0gY2x1c3Rlcl90YWJsZVssOToxM10gI2NyZWF0aW5nIHRhYmxlIG9mIEQgY2x1c3RlcnMNCmBgYA0KDQoqKjQuIE5vIG5vcm1hbGl6YXRpb24gUENBPz8qKg0KYGBge3J9DQpjbHVzdGVyX3RhYmxlIDwtIHQoY2x1c3Rlcl90YWJsZSkNCmNsdXN0ZXIucGNhIDwtIHByY29tcChjbHVzdGVyX3RhYmxlLCBzY2FsZSA9IFRSVUUsIG5hLnJtID0gVFJVRSkNCmluZC5jb29yZCA8LSBjbHVzdGVyLnBjYSR4DQpgYGANCg0KKio1LiBTdWJzZXR0aW5nIGRhdGEsIHRha2luZyBmaXJzdCAxMDAwIGNvbHVtbnMqKg0KYGBge3J9DQpzdWJzZWN0aW9ucyA8LSBhcy5kYXRhLmZyYW1lKGNsdXN0ZXJfdGFibGVbLDE6Ml0pDQpzdWJzZWN0aW9ucyRzdWIgPC1jKCJBMSIsICJBMSIsICJBMSIsICJBMiIsICJBMiIsICJBMiIsICJBMiIsICJENSIsICJENSIsICJENSIsICJENSIsICJBMiIsICJENSIpDQoNCnN1YnNlY3Rpb25zIDwtIHN1YnNlY3Rpb25zWywtYygxOjIpXQ0Kc3ViZmFjIDwtIGFzLmZhY3RvcihzdWJzZWN0aW9ucykNCg0KcG5nKCJjb3R0b25fb3V0Z3JvdXAuUENBLmRpcmVjdC5hbm5vdC5uZXcucG5nIiwgMTAwMCwgMTAwMCwgcG9pbnRzaXplPTIwKQ0KZnZpel9wY2FfaW5kKGNsdXN0ZXIucGNhLCBoYWJpbGxhZ2U9c3ViZmFjKSArIHRoZW1lX21pbmltYWwoKQ0KZGV2Lm9mZigpDQpgYGANCg0KDQojIyNQYXJ0IElJLiBSZWNyZWF0ZSB0aGUgYmFyIHBsb3Qgc2hvd2luZyB0aGUgYWJ1bmRhbmNlIG9mIHRoZSBtb3N0IGNvbW1vbiByZXBlYXQgdHlwZXMgaW4gdGhlIGdlbm9tZXMgb2YgdGhyZWUgKkdvc3N5cGl1bSogc3BlY2llcyAoRmlndXJlIDIpDQoNCioqMS4gU2V0IHVwKioNCmBgYHtyfQ0KbGlicmFyeShnZ3Bsb3QyKQ0KbGlicmFyeShyZXNoYXBlMikNCnN0YWJsZSA8LSByZWFkLnRhYmxlKCJmLmNzdiIsIHNlcCA9ICIsIiwgaGVhZGVyID1UUlVFKSAjUmVhZCBpbiBkYXRhIGZyYW1lDQpgYGANCg0KKioyLiBDcmVhdGUgbmV3IHJvd3MgdGhhdCBhcmUgYXZlcmFnZXMgb2YgZWFjaCBzcGVjaWVzKioNCmBgYHtyfQ0Kc3RhYmxlJEExIDwtIHJvd01lYW5zKHN0YWJsZVssMjo0XSkNCnN0YWJsZSRBMiA8LSByb3dNZWFucyhzdGFibGVbLDU6OV0pDQpzdGFibGUkRDUgPC0gcm93TWVhbnMoc3RhYmxlWywxMDoxNF0pDQpgYGANCg0KKiozLiBDcmVhdGUgc3RhbmRhcmQgZGV2aWF0aW9uIGZ1bmN0aW9uKioNCmBgYHtyfQ0Kc3RkIDwtIGZ1bmN0aW9uKHgpIHNkKHgpL3NxcnQobGVuZ3RoKHgpKQ0KYGBgDQoNCioqNC4gRmluZCBzdGFuZGFyZCBkZXZpYXRpb24gb2YgZWFjaCBzcGVjaWVzKioNCmBgYHtyfQ0Kc3RhYmxlJEExZXJyIDwtIGFwcGx5KHN0YWJsZVssMjo0XSwgMSwgc3RkKQ0Kc3RhYmxlJEEyZXJyIDwtIGFwcGx5KHN0YWJsZVssNTo5XSwgMSwgc3RkKQ0Kc3RhYmxlJEQ1ZXJyIDwtIGFwcGx5KHN0YWJsZVssMTA6MTRdLCAxLCBzdGQpDQpgYGANCg0KKio1LiBDcmVhdGUgU3RhbmRhcmQgRGV2aWF0aW9uIG1pbmltdW0qKg0KYGBge3J9DQpzdGFibGUkQTFtaW4gPC0gc3RhYmxlJEExIC0gc3RhYmxlJEExZXJyDQpzdGFibGUkQTJtaW4gPC0gc3RhYmxlJEEyIC0gc3RhYmxlJEEyZXJyDQpzdGFibGUkRDVtaW4gPC0gc3RhYmxlJEQ1IC0gc3RhYmxlJEQ1ZXJyDQpgYGANCg0KKio2LiBDcmVhdGUgU3RhbmRhcmQgRGV2aWF0aW9uIG1heGltdW0qKg0KYGBge3J9DQpzdGFibGUkQTFtYXggPC0gc3RhYmxlJEExICsgc3RhYmxlJEExZXJyDQpzdGFibGUkQTJtYXggPC0gc3RhYmxlJEEyICsgc3RhYmxlJEEyZXJyDQpzdGFibGUkRDVtYXggPC0gc3RhYmxlJEQ1ICsgc3RhYmxlJEQ1ZXJyDQpgYGANCg0KKio3LiBSZW1vdmUgY2F0ZWdvcml6YXRpb25zIG9mIFRFIHRoYXQgd2UgZG9uJ3QgY2FyZSBhYm91dCoqDQpgYGB7cn0NCnN0YWJsZSA8LSBzdGFibGVbLC0oMjoxNCldDQpgYGANCg0KKio4LiBNZWx0IGRhdGFmcmFtZSBpbiBvcmRlciB0byBwbG90IHByb3Blcmx5KioNCmBgYHtyfQ0KbWVsdGVkIDwtIG1lbHQoc3RhYmxlWywoMTo0KV0pDQptaW4gPC0gYyhzdGFibGUkQTFtaW4sIHN0YWJsZSRBMm1pbiwgc3RhYmxlJEQ1bWluKQ0KbWF4IDwtIGMoc3RhYmxlJEExbWF4LCBzdGFibGUkQTJtYXgsIHN0YWJsZSRENW1heCkNCm1lbHRlZCRtaW4gPC0gbWluDQptZWx0ZWQkbWF4IDwtIG1heA0KYGBgDQoNCioqOS4gQ3JlYXRlIHN0YW5kYXJkIGVycm9yIGJhcnMqKg0KYGBge3J9DQpsaW1pdHMgPC0gYWVzKHltYXg9bWVsdGVkJG1heCwgeW1pbj1tZWx0ZWQkbWluKQ0KYGBgDQoNCioqMTAuIE1haW50YWluIHdpZHRoIG9mIGJhcnMqKg0KYGBge3J9DQpkb2RnZSA8LSBwb3NpdGlvbl9kb2RnZSh3aWR0aD0wLjkpDQpgYGANCg0KKioxMS4gQ3JlYXRlIGltYWdlIHNwYWNlKioNCmBgYHtyfQ0KcG5nKCJGaWd1cmVfVEUuYW1vdW50cy5wbmciLCA3NTAwLCA1MDAwLCBwb2ludHNpemU9MTIsIHJlcz02MDApDQpgYGANCg0KKioxMi4gUGxvdCB3aXRoaW4gaW1hZ2Ugc3BhY2UqKg0KYGBge3J9DQpnZ3Bsb3QobWVsdGVkLCBhZXMoeD1MaW5lYWdlLCB5PXZhbHVlLCBmaWxsID0gdmFyaWFibGUpKSArIGdlb21fYmFyKHN0YXQgPSAiaWRlbnRpdHkiLHBvc2l0aW9uID0gZG9kZ2UpICsgZ2VvbV9lcnJvcmJhcihsaW1pdHMsIHBvc2l0aW9uID0gZG9kZ2UsIHdpZHRoPTAuMykgKyBsYWJzKHk9Ik1icC8xQyIsIHg9IiIpICsgdGhlbWVfc2V0KHRoZW1lX2dyZXkoYmFzZV9zaXplPTEyKSkgKyBzY2FsZV9maWxsX2h1ZShsPTQwKQ0KZGV2Lm9mZigpDQpgYGANCg0KDQojIyNQYXJ0IElJSS4gUmVjcmVhdGUgdGhlIHR3by13YXkgQU5PVkEgb2YgY2x1c3RlciBhYnVuZGFuY2UgYW1vbmcgdGhlIGxhcmdlc3QgMTAwMCBjbHVzdGVycyBpbiBmb3VyICpHb3NzeXBpdW0qIHNwZWNpZXMgKFRhYmxlIDIpDQoNCioqMS4gU2V0IHVwKioNCmBgYHtyfQ0KbGlicmFyeShyZXNoYXBlMikNCm5ld190YWJsZSA9IGNsdXN0ZXJfdGFibGUNCnJvdy5uYW1lcyhuZXdfdGFibGUpIDwtIGMoIkExIiwgIkExIiwgIkExIiwgIkEyIiwgIkEyIiwgIkEyIiwgIkEyIiwgIkQ1IiwgIkQ1IiwgIkQ1IiwgIkQ1IiwgIkEyIiwgIkQ1IikNCmBgYA0KDQoqKjIuIE1lbHQgZGF0YWZyYW1lIGluIG9yZGVyIHRvIHBsb3QgcHJvcGVybHkqKg0KYGBge3J9DQptZWx0ZWQgPC0gbWVsdChuZXdfdGFibGUpDQpZIDwtIG1lbHRlZCR2YWx1ZQ0KU3BlY2llcyA8LSBhcy5mYWN0b3IobWVsdGVkJFZhcjEpDQpDbHVzdGVyIDwtIGFzLmZhY3RvcihtZWx0ZWQkVmFyMikNCmBgYA0KDQoqKjMuIEFOT1ZBKioNCmBgYHtyfQ0KYW5vdmEobG0oWX5DbHVzdGVyKlNwZWNpZXMpKQ0KYGBgDQoNCg0KIyMjUGFydCBJVi4gUmVjcmVhdGUgc2NhdHRlciBwbG90IG9mIGNsdXN0ZXIgYWJ1bmRhbmNlIGluICpHb3NzeXBpdW0gaGVyYmFjZXVtKihBMSkgYW5kICpHb3NzeXBpdW0gYXJib3JldW0qKEEyKSAoRmlndXJlIDMpDQoNCioqMS4gU2V0IHVwKioNCmBgYHtyfQ0KbGlicmFyeShnZ3Bsb3QyKQ0KbmV3X3RhYmxlIDwtIGFzLmRhdGEuZnJhbWUodChjbHVzdGVyX3RhYmxlKSkNCm5ld190YWJsZSRBMWF2ZSA8LSByb3dNZWFucyhzdWJzZXQobmV3X3RhYmxlLCBzZWxlY3QgPSBjKEExXzE1NV8sIEExXzA3M18sIEExXzA5N18pLCBuYS5ybSA9IFRSVUUpKQ0KbmV3X3RhYmxlJEEyYXZlIDwtIHJvd01lYW5zKHN1YnNldChuZXdfdGFibGUsIHNlbGVjdCA9IGMoQTJfMjU1XywgQTJfMDM0XywgQTJfMDQ0XywgQTJfMDk5XywgQTJfMTAxXyksIG5hLnJtID0gVFJVRSkpDQpgYGANCg0KKioyLiBDcmVhdGUgdGhlIHNjYXR0ZXIgcGxvdCoqDQpgYGB7cn0NCmdncGxvdChBMWF2ZX5BMmF2ZSwgZGF0YT1uZXdfdGFibGUsIG1hcHBpbmcgPSBhZXMoeCA9IEExYXZlLCB5ID0gQTJhdmUpKSArIGdlb21fcG9pbnQoKSArIGdlb21fYWJsaW5lKGludGVyY2VwdD0wLCBzbG9wZT0xKQ0KDQpwbmcoImNvdHRvbi5vcmRpbmF0aW9uLnBuZyIsIDUwMDAsIDUwMDAsIHBvaW50c2l6ZT0xMiwgcmVzPTYwMCkNCmdncGxvdChjbWRwb2ludHMsIGFlcyh4PVYxLCB5PVYyLCBjb2xvcj1nZW5vbWUsIHNoYXBlPWdlbm9tZSkpICsgZ2VvbV9wb2ludChzaXplPTIpICsgeGxhYigiUENvQSBjb21wb25lbnQgMSIpICsgeWxhYigiUENvQSBjb21wb25lbnQgMiIpICsgc2NhbGVfY29sb3JfbWFudWFsKHZhbHVlcz1jKCJBMSI9Im9yY2hpZCIsICJBMiI9Im9yY2hpZDQiLCAiRDUiPSJzbGF0ZWdyZXkiLCJraXJraWkiPSJibHVlMyIsICJrb2tpYSI9ImdyZWVuMyIpKSsgZ2VvbV90ZXh0X3JlcGVsKGFlcyhsYWJlbD1zcGVjaWVzKSkjIyMgUmVjcmVhdGUgRmlndXJlIDQgU2ltb24ncyB3YXkNCm15ZGF0YSA8LSB0KGFubm90X2NsdXN0WywtYygxKV0pDQpkIDwtIGRpc3QobXlkYXRhLCBtZXRob2QgPSAiZXVjbGlkZWFuIikNCg0KY21kZml0IDwtIGNtZHNjYWxlKGQsZWlnPVRSVUUsIGs9MikgIyBrIGlzIHRoZSBudW1iZXIgb2YgZGltDQoNCnggPC0gY21kZml0JHBvaW50c1ssMV0NCnkgPC0gY21kZml0JHBvaW50c1ssMl0NCnBsb3QoeCwgeSwgeGxhYj0iQ29vcmRpbmF0ZSAxIiwgeWxhYj0iQ29vcmRpbmF0ZSAyIiwgDQogICAgIG1haW49Ik1ldHJpYyAgICAgICAgTURTIiwgICAgICAgIHR5cGU9Im4iKQ0KdGV4dCh4LCB5LCBsYWJlbHMgPSByb3cubmFtZXMobXlkYXRhKSwgY2V4PS43KQ0KYGBgDQoNCg0KIyMjUGFydCBWLiBSZWNyZWF0ZSB0aGUgcGxvdCBzaG93aW5nIGNvdHRvbiBzYW1wbGVzIGdyb3VwZWQgYnkgcmVwZWF0IGNvbnRlbnQgKEZpZ3VyZSA0KQ0KDQoqKjEuIE1ha2UgdGhlIGV1Y2xpZGVhbiBkaXN0YW5jZSBtYXRyaXgqKg0KYGBge3J9DQpkIDwtIGRpc3QoY2x1c3Rlcl90YWJsZSwgbWV0aG9kID0gImV1Y2xpZGVhbiIpDQpgYGANCg0KKioyLiBVc2luZyBjbWRzY2FsZSB0byBwZXJmb3JtIGNsYXNzaWNhbCBNRFMgKHByaW5jaXBhbCBjb29yZGluYXRlIGFuYWx5c2lzKSoqDQpgYGB7cn0NCmNtZGZpdCA8LSBjbWRzY2FsZShkLGVpZz1UUlVFLCBrPTIpICMgayBpcyB0aGUgbnVtYmVyIG9mIGRpbQ0KeCA8LSBjbWRmaXQkcG9pbnRzWywxXQ0KeSA8LSBjbWRmaXQkcG9pbnRzWywyXQ0KYGBgDQoNCioqMy4gTWFrZSB0aGUgcGxvdCoqDQpgYGB7cn0NCnBuZygiU1JCLkZpZzQucG5nIiwgNTAwMCwgNTAwMCwgcG9pbnRzaXplPTEyLCByZXM9NjAwKQ0KcGxvdCh4LCB5LCB4bGFiPSJDb29yZGluYXRlIDEiLCB5bGFiPSJDb29yZGluYXRlIDIiLCBtYWluPSJNZXRyaWMgTURTIiwJdHlwZT0ibiIpDQp0ZXh0KHgsIHksIGxhYmVscyA9IHJvdy5uYW1lcyhjbHVzdGVyX3RhYmxlKSwgY2V4PS43KQ0KcG9pbnRzKHgsIHksIHBjaD0xOSkNCmRldi5vZmYoKQ0KYGBg</div>
 
 
 

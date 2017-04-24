@@ -128,7 +128,7 @@ dev.off()
 ```
 
 
-###Part III. Recreate the two-way ANOVA of cluster abundance among the largest 1000 clusters in four *Gossypium* species (Table 2)
+###Part III. Recreate the two-way ANOVA of cluster abundance among the largest 1000 clusters in three *Gossypium* species (Table 2)
 
 **1. Set up**
 ```{r}

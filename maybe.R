@@ -4,10 +4,10 @@ library(reshape2)
 library(ggplot2)
 library(contrast)
 #input and structure data
-cluster_table <- t(head(as.matrix(read.table("table_clusters.txt", header = T)),1000))
+cluster_matrix <- t(head(as.matrix(read.table("table_clusters.txt", header = T)),1000))
 
 #Table 2 (two-way ANOVA test, as done in the paper)
-new_table <- cluster_table
+new_table <- cluster_matrix
 row.names(new_table) <- c("A1", "A1", "A1", "A2", "A2", "A2", "A2", "D5", "D5", "D5", "D5", "A2", "D5")
 melted <- melt(new_table)
 Y <- melted$value
@@ -22,7 +22,7 @@ anova(linear_model) #same as in paper
 ###Figure 3 (with colors, but no BH correction) 
 #differences between this figure and Simon's figure is highlighted on Simon_Fig3_discrepency_noBH.png
 
-cluster_table <- as.data.frame(t(cluster_table))
+cluster_table <- as.data.frame(t(cluster_matrix))
 cluster_table$A1ave <- rowMeans(subset(cluster_table, select = c(A1_155_, A1_073_, A1_097_), na.rm = TRUE))
 cluster_table$A2ave <- rowMeans(subset(cluster_table, select = c(A2_255_, A2_034_, A2_044_, A2_099_, A2_101_), na.rm = TRUE))
 cluster_table$D5ave <- rowMeans(subset(cluster_table, select = c(D5_002_, D5_031_, D5_004_, D5_053_, D5_ggg_), na.rm = TRUE))
@@ -55,7 +55,9 @@ cluster_table$A2D5.significant <- as.factor(cluster_table$A2D5.sign * cluster_ta
 cluster_table$A2D5.significant.BH <- as.factor(cluster_table$A2D5.sign * cluster_table$A2D5.direction.BH)
 
 
-####Table 3 (not same numbers as paper, but same methods (excpet I didn't do BH correction))
+####Table 3 (not same numbers as paper, but same methods 
+
+#without BH correction
 A1A2.clusters <- sum(cluster_table$A1A2.significant != 0)
 A1D5.clusters <- sum(cluster_table$A1D5.significant != 0)
 A2D5.clusters <- sum(cluster_table$A2D5.significant != 0)
@@ -63,7 +65,7 @@ A1A2.clusters
 A1D5.clusters
 A2D5.clusters
 
-
+#with BH correction
 A1A2.clusters.BH <- sum(cluster_table$A1A2.significant.BH != 0)
 A1D5.clusters.BH <- sum(cluster_table$A1D5.significant.BH != 0)
 A2D5.clusters.BH <- sum(cluster_table$A2D5.significant.BH != 0)
@@ -93,45 +95,15 @@ ggplot(A2ave~D5ave, data=cluster_table, mapping = aes(x = A2ave, y = D5ave, colo
 ########################################################
 
 
-
 #factors for manova tests
-AD <- as.factor(c("A", "A", "A", "A", "A", "A", "A", "D", "D", "D", "D", "A", "D"))
 A1A2D5 <- as.factor(c("A1", "A1", "A1", "A2", "A2", "A2", "A2", "D5", "D5", "D5", "D5", "A2", "D5"))
-A1.ancestral <- as.factor(c("A", "Ancestral", "A", "A", "A", "A", "A", "D", "D", "D", "D", "A", "D"))
+AD <- as.factor(c("A", "A", "A", "A", "A", "A", "A", "D", "D", "D", "D", "A", "D"))
+Awild <- as.factor(c("A", "Awild", "A", "A", "A", "A", "A", "D", "D", "D", "D", "A", "D"))
+PermManova.3species <- advanced.procD.lm(cluster_matrix~A1A2D5, ~ 1, groups = ~A1A2D5)
+PermManova.2species <- advanced.procD.lm(cluster_matrix~AD, ~ 1, groups = ~AD)
+PermManova.commonwild <- advanced.procD.lm(cluster_matrix~Awild, ~ 1, groups = ~Awild)
+PermManova.3species$P.means.dist
+PermManova.2species$P.means.dist
+PermManova.commonwild$P.means.dist
 
-
-#manova for 2 species (A and D)
-two.species <- procD.lm(cluster_table~AD)
-two.z <- two.species$aov.table[[1,6]]
-two.rand.mean <- mean(two.species$random.SS)
-two.rand.sd <- sd(two.species$random.SS)
-two.species #significant 
-
-
-#manova for 3 species (A1, A2, and D5)
-A1A2D5.species <- procD.lm(cluster_table~A1A2D5)
-A1A2D5.z <- A1A2D5.species$aov.table[[1,6]]
-A1A2D5.rand.mean <- mean(A1A2D5.species$random.SS)
-A1A2D5.rand.sd <- sd(A1A2D5.species$random.SS)
-A1A2D5.species #significant
-
-
-#manova for 2 species, and wild progenitor (D5, A, and A1-73 as wild progenitor)
-A1.ancestral.species <- procD.lm(cluster_table~A1.ancestral)
-A1.ancestral.z <- A1.ancestral.species$aov.table[[1,6]]
-A1.ancestral.rand.mean <- mean(A1.ancestral.species$random.SS)
-A1.ancestral.rand.sd <- sd(A1.ancestral.species$random.SS)
-A1.ancestral.species #significant
-
-#####Z-tests
-#can be compared to Z distribution. See Adams & Collyer, 2016 Evolution. "On the comparison of the strengthof morphological integration acrossmorphometric datasets "
-A1A2D5.z.test <- (((two.z-two.rand.mean)-(A1A2D5.z - A1A2D5.rand.mean)) / sqrt((two.rand.sd)^2 + (A1A2D5.rand.sd)^2))
-A1.ancestral.z.test <- (((two.z-two.rand.mean)-(A1.ancestral.z - A1.ancestral.rand.mean)) / sqrt((two.rand.sd)^2 + (A1.ancestral.rand.sd)^2))
-
-
-######results of z-test
-A1A2D5.z.test
-#p-value of x-score for 0.48 is .6844; for z-score of 0.49 is .6879
-A1.ancestral.z.test
-#p-value for Z-score of 0.57 is 0.7175; p-value for a-score of 0.58 is 0.7190 
 

@@ -29,7 +29,7 @@ Acluster_table <- cluster_table[,1:8] #creating table of A clusters
 Dcluster_table <- cluster_table[,9:13] #creating table of D clusters
 ```
 
-**4. No normalization PCA??**
+**4. No normalization PCA**
 ```{r}
 cluster_table <- t(cluster_table)
 cluster.pca <- prcomp(cluster_table, scale = TRUE, na.rm = TRUE)

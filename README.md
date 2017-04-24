@@ -2,4 +2,4 @@
 Final project regarding "Independent Domestication of Two Old World Cotton Species"
 
 Presentation slides were written in LaTeX and are publicly available on [Overleaf]( 
-https://www.overleaf.com/9197205fdqhzqrgkqhd#/33118535/) & 
+https://www.overleaf.com/9225359vkpptpfvcsbk#/33236472/) 

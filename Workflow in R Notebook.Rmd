@@ -151,7 +151,7 @@ anova(lm(Y~Cluster*Species))
 ```
 
 
-###Part IV. Recreate scatter plot of cluster abundance in *Gossypium herbaceum*(A1) and *Gossypium arboreum*(A2) (Figure 3)
+###Part IV. Recreate scatter plot of cluster abundance in *Gossypium herbaceum* (A1) and *Gossypium arboreum* (A2) (Figure 3)
 
 **1. Set up**
 ```{r}
